@@ -1,1 +1,1 @@
-# GetPodLogsEfficiantly
+# GetPodLogsEfficiently

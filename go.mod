@@ -1,3 +1,3 @@
-module logs_example
+module GetPodLogsEfficiently
 
 go 1.17

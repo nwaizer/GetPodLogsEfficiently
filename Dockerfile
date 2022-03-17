@@ -5,7 +5,7 @@ ENV COMMON_GO_ARGS=-race
 ENV GOOS=linux
 ENV GOPATH=/go
 
-WORKDIR /go/src/github.com/nwaizer/GetPodLogsEfficiantly
+WORKDIR /go/src/github.com/nwaizer/GetPodLogsEfficiently
 COPY ./main.go ./
 RUN go install
-CMD ["/go/bin/GetPodLogsEfficiantly"]
+CMD ["/go/bin/GetPodLogsEfficiently"]
