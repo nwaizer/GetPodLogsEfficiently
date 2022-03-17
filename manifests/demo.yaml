@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: get-pod-logs-efficiently
+  labels:
+    app: demo
+spec:
+  containers:
+    - name: podslogs
+      image: quay.io/rhn_support_nwaizer/get_pod_logs_efficiently
