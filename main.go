@@ -1,13 +1,13 @@
 package main
 
 import (
-	"GetPodLogsEfficiently/Getlogs"
 	"GetPodLogsEfficiently/client"
 	"bufio"
 	"context"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"strings"
 	"time"
@@ -89,7 +89,7 @@ func Checker(cancelCtx context.Context, Pod corev1.Pod, outch chan string) {
 	LogStream, _ := req.Stream(context.Background())
 
 	scanner := bufio.NewScanner(LogStream)
-	var expectedString = "Good"
+	var expectedString = "Demoi"
 	var line string
 
 	for {
@@ -117,7 +117,7 @@ func Checker(cancelCtx context.Context, Pod corev1.Pod, outch chan string) {
 }
 
 func main() {
-	PodsList := Getlogs.GetPod()
+	PodsList := GetPod(Namespace)
 	ctx := context.Background()
 	cancelCtx, endCheckers := context.WithCancel(ctx)
 
@@ -131,4 +131,13 @@ func main() {
 		endCheckers()
 		return
 	}
+}
+
+func GetPod(NameSpace string) *corev1.PodList {
+	Pods, err := client.Client.Pods(NameSpace).List(context.Background(), v1.ListOptions{
+		LabelSelector: "app=demo"})
+	if err != nil {
+		log.Errorf("Failed to get demo pod from cluster %v", client.Client.Config.Host)
+	}
+	return Pods
 }
