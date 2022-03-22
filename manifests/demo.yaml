@@ -1,12 +1,22 @@
-
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: ReplicaSet
 metadata:
   namespace: default
-  name: get-pod-logs-efficiently
+  name: pods4logs
   labels:
-    app: demo
+    app: logsdemo
+    tier: logsdemo
 spec:
-  containers:
-    - name: podslogs
-      image: quay.io/rhn_support_nwaizer/get_pod_logs_efficiently
+  # modify replicas according to your case
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: logsdemo
+  template:
+    metadata:
+      labels:
+        tier: logsdemo
+    spec:
+      containers:
+      - name: generatelogs
+        image: quay.io/rhn_support_nwaizer/get_pod_logs_efficiently
