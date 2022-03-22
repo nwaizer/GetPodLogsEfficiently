@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var namespace = "hw-event-proxy-operator-system"
+var namespace = "default"
 
 func GetPodLogs(namespace string, podName string, container string) error {
 	clientSet := client.New("")

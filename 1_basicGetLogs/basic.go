@@ -11,7 +11,7 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var NameSpace = "demo"
+var NameSpace = "default"
 
 func getPodLogs() string {
 	Pods, err := client.Client.Pods(NameSpace).List(context.Background(), metaV1.ListOptions{

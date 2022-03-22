@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var Namespace = "hw-event-proxy-operator-system"
+var Namespace = "default"
 
 func init() {
 	lvl, ok := os.LookupEnv("LOG_LEVEL")
