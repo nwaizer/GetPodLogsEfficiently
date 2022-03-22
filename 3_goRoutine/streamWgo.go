@@ -6,12 +6,12 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"time"
 )
 
 func GetPodLogs(podName string) error {
-	podLogOpts := v1.PodLogOptions{}
+	podLogOpts := corev1.PodLogOptions{}
 	podLogOpts.Follow = true
 	podLogOpts.TailLines = &[]int64{int64(100)}[0]
 	podLogs, err := client.Client.CoreV1Interface.Pods(utils.Namespace).GetLogs(podName, &podLogOpts).Stream(context.Background())
