@@ -2,18 +2,16 @@ package main
 
 import (
 	"GetPodLogsEfficiently/client"
+	"GetPodLogsEfficiently/utils"
 	"bufio"
 	"context"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"strings"
 	"time"
 )
-
-var Namespace = "default"
 
 func init() {
 	lvl, ok := os.LookupEnv("LOG_LEVEL")
@@ -83,13 +81,14 @@ func VerifyEvents(PodsList *corev1.PodList, consumerOutChannel chan string, time
 }
 
 func Checker(cancelCtx context.Context, Pod corev1.Pod, outch chan string) {
-	req := client.Client.Pods(Namespace).GetLogs(Pod.Name, &corev1.PodLogOptions{
-		Follow: true,
+	req := client.Client.Pods(utils.Namespace).GetLogs(Pod.Name, &corev1.PodLogOptions{
+		Follow:    true,
+		TailLines: &[]int64{int64(10)}[0],
 	})
 	LogStream, _ := req.Stream(context.Background())
 
 	scanner := bufio.NewScanner(LogStream)
-	var expectedString = "Demo"
+	var expectedString = "Good"
 	var line string
 
 	for {
@@ -117,7 +116,7 @@ func Checker(cancelCtx context.Context, Pod corev1.Pod, outch chan string) {
 }
 
 func main() {
-	PodsList := GetPod(Namespace)
+	PodsList := utils.GetPods()
 	ctx := context.Background()
 	cancelCtx, endCheckers := context.WithCancel(ctx)
 
@@ -131,13 +130,4 @@ func main() {
 		endCheckers()
 		return
 	}
-}
-
-func GetPod(NameSpace string) *corev1.PodList {
-	Pods, err := client.Client.Pods(NameSpace).List(context.Background(), v1.ListOptions{
-		LabelSelector: "app=demo"})
-	if err != nil {
-		log.Errorf("Failed to get demo pod from cluster %v", client.Client.Config.Host)
-	}
-	return Pods
 }

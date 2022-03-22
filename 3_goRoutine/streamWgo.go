@@ -2,6 +2,7 @@ package main
 
 import (
 	"GetPodLogsEfficiently/client"
+	"GetPodLogsEfficiently/utils"
 	"bufio"
 	"context"
 	"fmt"
@@ -9,20 +10,11 @@ import (
 	"time"
 )
 
-var namespace = "default"
-
-func GetPodLogs(namespace string, podName string, container string) error {
-	clientSet := client.New("")
-	//pod, err := clientSet.CoreV1Interface.Pods(namespace).Get(context.Background(), podName, metav1.GetOptions{})
-	//if err != nil {
-	//	return err
-	//}
-
+func GetPodLogs(podName string) error {
 	podLogOpts := v1.PodLogOptions{}
 	podLogOpts.Follow = true
 	podLogOpts.TailLines = &[]int64{int64(100)}[0]
-	podLogOpts.Container = container
-	podLogs, err := clientSet.CoreV1Interface.Pods(namespace).GetLogs(podName, &podLogOpts).Stream(context.Background())
+	podLogs, err := client.Client.CoreV1Interface.Pods(utils.Namespace).GetLogs(podName, &podLogOpts).Stream(context.Background())
 	if err != nil {
 		return err
 	}
@@ -37,7 +29,7 @@ func GetPodLogs(namespace string, podName string, container string) error {
 				return
 			default:
 				line := reader.Text()
-				fmt.Println("worker"+"/"+podLogOpts.Container, line)
+				fmt.Printf("Pod: %v line: %v\n", podName, line)
 			}
 		}
 	}(cancelCtx)
@@ -48,5 +40,8 @@ func GetPodLogs(namespace string, podName string, container string) error {
 	return nil
 }
 func main() {
-	GetPodLogs(namespace, "get-pod-logs-efficiently", "podslogs")
+	for _, pod := range utils.GetPods().Items {
+		fmt.Println(pod.Name)
+		GetPodLogs(pod.Name)
+	}
 }

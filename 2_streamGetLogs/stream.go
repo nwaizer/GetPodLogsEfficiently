@@ -2,23 +2,19 @@ package main
 
 import (
 	"GetPodLogsEfficiently/client"
+	"GetPodLogsEfficiently/utils"
 	"bufio"
 	"context"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"time"
 )
 
-var namespace = "default"
-
-func GetPodLogs(namespace string, podName string, container string) error {
-	clientSet := client.New("")
-
-	podLogOpts := v1.PodLogOptions{}
+func GetPodLogs(podName string) error {
+	podLogOpts := corev1.PodLogOptions{}
 	podLogOpts.Follow = true
-	podLogOpts.TailLines = &[]int64{int64(100)}[0]
-	podLogOpts.Container = container
-	podLogs, err := clientSet.CoreV1Interface.Pods(namespace).GetLogs(podName, &podLogOpts).Stream(context.Background())
+	podLogOpts.TailLines = &[]int64{int64(100)}[0] //get 100 last lines
+	podLogs, err := client.Client.CoreV1Interface.Pods(utils.Namespace).GetLogs(podName, &podLogOpts).Stream(context.Background())
 	if err != nil {
 		return err
 	}
@@ -27,7 +23,7 @@ func GetPodLogs(namespace string, podName string, container string) error {
 		reader := bufio.NewScanner(podLogs)
 		for reader.Scan() {
 			line := reader.Text()
-			fmt.Println("worker"+"/"+podLogOpts.Container, line)
+			fmt.Printf("Pod: %v line: %v\n", podName, line)
 		}
 		time.Sleep(1 * time.Millisecond)
 	}
@@ -35,5 +31,8 @@ func GetPodLogs(namespace string, podName string, container string) error {
 }
 
 func main() {
-	GetPodLogs(namespace, "get-pod-logs-efficiently", "podslogs")
+	for _, pod := range utils.GetPods().Items {
+		fmt.Println(pod.Name)
+		GetPodLogs(pod.Name)
+	}
 }
