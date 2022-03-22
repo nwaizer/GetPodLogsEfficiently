@@ -6,6 +6,6 @@ ENV GOOS=linux
 ENV GOPATH=/go
 
 WORKDIR /go/src/github.com/nwaizer/GetPodLogsEfficiently
-COPY ./main.go ./
+COPY ./demoPod/main.go ./
 RUN go install
 CMD ["/go/bin/GetPodLogsEfficiently"]

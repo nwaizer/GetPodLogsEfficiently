@@ -89,7 +89,7 @@ func Checker(cancelCtx context.Context, Pod corev1.Pod, outch chan string) {
 	LogStream, _ := req.Stream(context.Background())
 
 	scanner := bufio.NewScanner(LogStream)
-	var expectedString = "Demoi"
+	var expectedString = "Demo"
 	var line string
 
 	for {
