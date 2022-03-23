@@ -8,24 +8,12 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	"os"
 	"strings"
 	"time"
 )
 
 func init() {
-	lvl, ok := os.LookupEnv("LOG_LEVEL")
-	// LOG_LEVEL not set, let's default to debug
-	if !ok {
-		lvl = "debug"
-	}
-	// parse string, this is built-in feature of logrus
-	ll, err := log.ParseLevel(lvl)
-	if err != nil {
-		ll = log.DebugLevel
-	}
-	// set global log level
-	log.SetLevel(ll)
+	utils.SetDebuglogLevel()
 }
 
 func Contains(arr []string, str string) bool {
@@ -40,9 +28,9 @@ func Contains(arr []string, str string) bool {
 func VerifyEvents(PodsList *corev1.PodList, consumerOutChannel chan string, timeoutDuration int) bool {
 	results := make(map[string][]string)
 	ctx := context.Background()
-	timeout, cancelTimeout := context.WithTimeout(ctx, time.Duration(timeoutDuration)*time.Second)
+	timeout, cancelTimeout := context.WithTimeout(ctx, time.Duration(timeoutDuration)*time.Millisecond)
 	var testingOk string
-	for i := 0; i < len(PodsList.Items); i++ {
+	for {
 		select {
 		case <-timeout.Done():
 			log.Errorln("Timeout expired")
@@ -126,8 +114,8 @@ func main() {
 		go Checker(cancelCtx, aPod, outChannel)
 	}
 
-	if !VerifyEvents(PodsList, outChannel, 180) {
+	if !VerifyEvents(PodsList, outChannel, 100) {
 		endCheckers()
-		return
+		log.Errorf("Test failed due to error pronted above")
 	}
 }
