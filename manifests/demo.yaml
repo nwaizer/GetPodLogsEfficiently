@@ -1,21 +1,19 @@
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
-  namespace: default
   name: pods4logs
+  namespace: default
   labels:
     app: logsdemo
-    tier: logsdemo
 spec:
-  # modify replicas according to your case
   replicas: 3
   selector:
     matchLabels:
-      tier: logsdemo
+      app: logsdemo
   template:
     metadata:
       labels:
-        tier: logsdemo
+        app: logsdemo
     spec:
       containers:
       - name: generatelogs
