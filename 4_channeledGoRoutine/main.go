@@ -95,6 +95,7 @@ func Checker(cancelCtx context.Context, Pod corev1.Pod, outch chan string) {
 				} else {
 					log.Errorf("Pod %v did not get string %v \n", Pod.Name, expectedString)
 					outch <- fmt.Sprintf("%v/%v/FAIL", Pod.Name, expectedString)
+					break
 				}
 			}
 			if scanner.Err() != nil {
@@ -120,6 +121,6 @@ func main() {
 
 	if !VerifyEvents(PodsList, outChannel, 100) {
 		endCheckers()
-		log.Errorf("Test failed due to error pronted above")
+		log.Errorf("Test failed due to error printed above")
 	}
 }
