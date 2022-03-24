@@ -8,7 +8,6 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	"runtime/pprof"
 	"strings"
 	"time"
 )
@@ -113,10 +112,7 @@ func main() {
 	outChannel := make(chan string, len(PodsList.Items))
 
 	for _, aPod := range PodsList.Items {
-		labels := pprof.Labels("request", "automated", "pod", aPod.Name)
-		pprof.Do(context.Background(), labels, func(_ context.Context) {
-			go Checker(cancelCtx, aPod, outChannel)
-		})
+		go Checker(cancelCtx, aPod, outChannel)
 	}
 
 	if !VerifyEvents(PodsList, outChannel, 100) {
