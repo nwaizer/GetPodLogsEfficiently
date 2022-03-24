@@ -33,9 +33,6 @@ func GetPodLogs(podName string) error {
 			}
 		}
 	}(cancelCtx)
-	for i := 0; i < 10; i++ {
-		time.Sleep(1 * time.Millisecond)
-	}
 	endGofunc()
 	return nil
 }
@@ -44,4 +41,5 @@ func main() {
 		fmt.Println(pod.Name)
 		GetPodLogs(pod.Name)
 	}
+	time.Sleep(10 * time.Millisecond)
 }
