@@ -68,14 +68,15 @@ func VerifyEvents(PodsList *corev1.PodList, consumerOutChannel chan string, time
 	return true
 }
 
-func Checker(cancelCtx context.Context, Pod corev1.Pod, outch chan string) {
-	req := client.Client.Pods(utils.Namespace).GetLogs(Pod.Name, &corev1.PodLogOptions{
+func Checker(cancelCtx context.Context, PodName string, outch chan string) {
+	PodLogsConnection := client.Client.Pods(utils.Namespace).GetLogs(PodName, &corev1.PodLogOptions{
 		Follow:    true,
 		TailLines: &[]int64{int64(10)}[0],
 	})
-	LogStream, _ := req.Stream(context.Background())
+	LogStream, _ := PodLogsConnection.Stream(context.Background())
+	defer LogStream.Close()
 
-	scanner := bufio.NewScanner(LogStream)
+	reader := bufio.NewScanner(LogStream)
 	var expectedString = "Good"
 	var line string
 
@@ -84,21 +85,21 @@ func Checker(cancelCtx context.Context, Pod corev1.Pod, outch chan string) {
 		case <-cancelCtx.Done():
 			break
 		default:
-			for scanner.Scan() {
-				line = scanner.Text()
+			for reader.Scan() {
+				line = reader.Text()
 				log.Debugln(line)
 				// check the log line
 				if strings.Contains(line, expectedString) {
-					log.Infof("Pod %v got: %v\t", Pod.Name, expectedString)
-					outch <- fmt.Sprintf("%v/%v/OK", Pod.Name, expectedString)
+					log.Infof("Pod %v got: %v\t", PodName, expectedString)
+					outch <- fmt.Sprintf("%v/%v/OK", PodName, expectedString)
 				} else {
-					log.Errorf("Pod %v did not get string %v \n", Pod.Name, expectedString)
-					outch <- fmt.Sprintf("%v/%v/FAIL", Pod.Name, expectedString)
+					log.Errorf("Pod %v did not get string %v \n", PodName, expectedString)
+					outch <- fmt.Sprintf("%v/%v/FAIL", PodName, expectedString)
 					break
 				}
 			}
-			if scanner.Err() != nil {
-				log.Errorln(scanner.Err())
+			if reader.Err() != nil {
+				log.Errorln(reader.Err())
 			}
 		}
 	}
@@ -111,11 +112,11 @@ func main() {
 
 	outChannel := make(chan string, len(PodsList.Items))
 
-	for _, aPod := range PodsList.Items {
-		go Checker(cancelCtx, aPod, outChannel)
+	for _, Pod := range PodsList.Items {
+		go Checker(cancelCtx, Pod.Name, outChannel)
 	}
 
-	if !VerifyEvents(PodsList, outChannel, 100) {
+	if !VerifyEvents(PodsList, outChannel, 10000) {
 		endCheckers()
 		log.Errorf("Test failed due to error printed above")
 	}
