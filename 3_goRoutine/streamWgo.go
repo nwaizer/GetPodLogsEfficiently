@@ -10,36 +10,35 @@ import (
 	"time"
 )
 
-func GetPodLogs(podName string) error {
-	podLogOpts := corev1.PodLogOptions{}
-	podLogOpts.Follow = true
-	podLogOpts.TailLines = &[]int64{int64(100)}[0]
-	podLogs, err := client.Client.CoreV1Interface.Pods(utils.Namespace).GetLogs(podName, &podLogOpts).Stream(context.Background())
-	if err != nil {
-		return err
-	}
-	defer podLogs.Close()
-	ctx := context.Background()
-	cancelCtx, endGofunc := context.WithCancel(ctx)
-	go func(cancelCtx context.Context) {
-		reader := bufio.NewScanner(podLogs)
-		for reader.Scan() {
-			select {
-			case <-cancelCtx.Done():
-				return
-			default:
-				line := reader.Text()
-				fmt.Printf("Pod: %v line: %v\n", podName, line)
+func GetPodLogs(cancelCtx context.Context, PodName string) {
+	PodLogsConnection := client.Client.Pods(utils.Namespace).GetLogs(PodName, &corev1.PodLogOptions{
+		Follow:    true,
+		TailLines: &[]int64{int64(10)}[0],
+	})
+	LogStream, _ := PodLogsConnection.Stream(context.Background())
+	defer LogStream.Close()
+
+	reader := bufio.NewScanner(LogStream)
+	var line string
+	for {
+		select {
+		case <-cancelCtx.Done():
+			break
+		default:
+			for reader.Scan() {
+				line = reader.Text()
+				fmt.Printf("Pod: %v line: %v\n", PodName, line)
 			}
 		}
-	}(cancelCtx)
-	endGofunc()
-	return nil
+	}
 }
 func main() {
+	ctx := context.Background()
+	cancelCtx, endGofunc := context.WithCancel(ctx)
 	for _, pod := range utils.GetPods().Items {
 		fmt.Println(pod.Name)
-		GetPodLogs(pod.Name)
+		go GetPodLogs(cancelCtx, pod.Name)
 	}
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(10 * time.Second)
+	endGofunc()
 }
