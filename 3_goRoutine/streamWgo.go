@@ -21,11 +21,11 @@ func GetPodLogs(cancelCtx context.Context, PodName string) {
 	reader := bufio.NewScanner(LogStream)
 	var line string
 	for {
-		select {
-		case <-cancelCtx.Done():
-			break
-		default:
-			for reader.Scan() {
+		for reader.Scan() {
+			select {
+			case <-cancelCtx.Done():
+				break
+			default:
 				line = reader.Text()
 				fmt.Printf("Pod: %v line: %v\n", PodName, line)
 			}
