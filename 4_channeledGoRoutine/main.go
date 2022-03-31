@@ -28,7 +28,7 @@ func Contains(arr []string, str string) bool {
 func VerifyEvents(PodsList *corev1.PodList, consumerOutChannel chan string, timeoutDuration int) bool {
 	results := make(map[string][]string)
 	ctx := context.Background()
-	timeout, cancelTimeout := context.WithTimeout(ctx, time.Duration(timeoutDuration)*time.Millisecond)
+	timeout, cancelTimeout := context.WithTimeout(ctx, time.Duration(timeoutDuration)*time.Second)
 	var testingOk string
 	for {
 		select {
@@ -81,11 +81,11 @@ func Checker(cancelCtx context.Context, PodName string, outch chan string) {
 	var line string
 
 	for {
-		select {
-		case <-cancelCtx.Done():
-			break
-		default:
-			for reader.Scan() {
+		for reader.Scan() {
+			select {
+			case <-cancelCtx.Done():
+				break
+			default:
 				line = reader.Text()
 				log.Debugln(line)
 				// check the log line
@@ -116,7 +116,7 @@ func main() {
 		go Checker(cancelCtx, Pod.Name, outChannel)
 	}
 
-	if !VerifyEvents(PodsList, outChannel, 10000) {
+	if !VerifyEvents(PodsList, outChannel, 10) {
 		endCheckers()
 		log.Errorf("Test failed due to error printed above")
 	}
