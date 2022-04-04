@@ -37,13 +37,14 @@ Now we will use a context to allow use to stop the go routines that run in the b
 .
 Each go routine will check the log line and send the result to this channel
 .
-.
-.
 Spin-up a go routine for each pod.
 .
 .
+Now run this collector function that will ignite in case a single of the go routines fail a verify.
 .
-Now run this collector function that will ignite in case a single of the go routines fail a verify. 
+.
+.
+
 .
 .
 .
