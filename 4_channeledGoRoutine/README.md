@@ -34,6 +34,8 @@ Here we first get a list of pods. each pod runs a single container, generating t
 Now we will use a context to allow use to stop the go routines that run in the background
 .
 .
+.
+.
 Each go routine will check the log line and send the result to this channel
 Spin-up a go routine for each pod.
 .
