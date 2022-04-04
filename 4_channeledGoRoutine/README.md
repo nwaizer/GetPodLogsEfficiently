@@ -31,6 +31,8 @@
 <td>
 <pre>
 Here we first get a list of pods. each pod runs a single container, generating the log line
+.
+.
 Now we will use a context to allow use to stop the go routines that run in the background
 .
 .
