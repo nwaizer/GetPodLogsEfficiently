@@ -1,33 +1,46 @@
-
+<head>
+  <title>Line by line</title>
+  <link rel=stylesheet href="https://gobyexample.com/site.css">
+</head>
+<div class="example" id="goroutines">
 <table>
 <tr>
 <th>Go code</th>
 <th>Comments</th>
 </tr>
 <tr>
-<td>
+<td class="docs">
 <pre>
-
   func main() {
-	PodsList := utils.GetPods()
+	Client = client.New("")
 	ctx := context.Background()
 	cancelCtx, endCheckers := context.WithCancel(ctx)
 
-	outChannel := make(chan string, len(PodsList.Items))
+	pods, err := client.Client.Pods(Namespace).List(context.Background(), v12.ListOptions{
+		LabelSelector: LabelSelector})
 
-	for _, Pod := range PodsList.Items {
+	if err != nil {
+		logrus.Errorf("Failed to get demo pod from cluster %v", client.Client.Config.Host)
+
+		return
+	}
+
+	outChannel := make(chan string, len(pods.Items))
+
+	for _, Pod := range pods.Items {
 		go Checker(cancelCtx, Pod.Name, outChannel)
 	}
 
-	if !VerifyEvents(PodsList, outChannel, 10) {
+	if !VerifyEvents(pods, outChannel, 10) {
 		endCheckers()
-		log.Errorf("Test failed due to error printed above")
+		logrus.Errorf("Test failed due to error printed above")
 	}
 }
 
 
 </pre>
 </td>
+
 <td>
 <pre>
 Here we first get a list of pods. each pod runs a single container, generating the log line
@@ -42,14 +55,12 @@ Spin-up a go routine for each pod.
 .
 Now run this collector function that will ignite in case a single of the go routines fail a verify.
 .
-.
-.
-
-.
-.
-.
-.
 </pre>
 </td>
-</tr>
+.
 </table>
+</div>
+.
+.
+.
+.
