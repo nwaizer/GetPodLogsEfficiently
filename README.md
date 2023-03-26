@@ -1,25 +1,26 @@
 # GetPodLogsEfficiently
-Imaging you have a kubernetes cluster with several pods printing logs.   
-Purpose of this repo is to share several examples for fetching logs from pods.
+Imagine you have a kubernetes cluster with several pods printing logs.
+This is the tale of how I use the tools provided in Go, to fetch the logs from the pods, in a different way.
 
-In my use case I want to preform an action and then see it print to the logs in the pods.
+The original use-case, had many pods listening to a common input and print out a common log line.
+
 I then complicate it with two demands:
-1. I want to preform the action multiple times, and check the logs multiple times.
+1. The common input may change multiple times, and then the code need to check the log multiple times.
 2. I want to have many pods that will react the same way.
 
 Simple get Logs:
-[Simple getlogs](https://github.com/nwaizer/GetPodLogsEfficiently/blob/main/1_basicGetLogs/basic.go)
+[Simple getlogs](https://github.com/nwaizer/GetPodLogsEfficiently/blob/main/cmd/basicgetlogs/basic.go)
 
 In order to meet the first demand we can poll the logs stream as in the stream example:
-[stream example](https://github.com/nwaizer/GetPodLogsEfficiently/blob/main/2_streamGetLogs/stream.go)
+[stream example](https://github.com/nwaizer/GetPodLogsEfficiently/blob/main/cmd/streamgetlogs/stream.go)
 
 
 To meet the second demand in a more efficient way I will use go-routines:
-[go routine example](https://github.com/nwaizer/GetPodLogsEfficiently/blob/main/3_goRoutine/streamWgo.go)
+[go routine example](https://github.com/nwaizer/GetPodLogsEfficiently/blob/main/cmd/goroutine/streamWgo.go)
 
 
 And then I add verification and a timeout to the go routines:
-[Channeled go routines example](https://github.com/nwaizer/GetPodLogsEfficiently/blob/main/4_channeledGoRoutine/main.go)
+[Channeled go routines example](https://github.com/nwaizer/GetPodLogsEfficiently/blob/main/cmd/channeledgoroutine/channeledgoroutine.go)
 
 # Setup
 1. Have the kubeconfig for the cluster in your ~/.kube/config or have a shell environment KUBECONFIG point to it: `$ export KUBECONFIG="~/file"`
