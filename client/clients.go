@@ -20,10 +20,6 @@ import (
 // Client defines the client set that will be used for testing
 var Client *Set
 
-func init() {
-	Client = New("")
-}
-
 // Set provides the struct to talk with relevant API
 type Set struct {
 	client.Client
@@ -37,6 +33,7 @@ type Set struct {
 // New returns a *ClientBuilder with the given kubeconfig.
 func New(kubeconfig string) *Set {
 	var config *rest.Config
+
 	var err error
 
 	if kubeconfig == "" {
@@ -50,8 +47,10 @@ func New(kubeconfig string) *Set {
 		log.Infof("Using in-cluster kube client config")
 		config, err = rest.InClusterConfig()
 	}
+
 	if err != nil {
 		log.Infof("Failed to create a valid client")
+
 		return nil
 	}
 
