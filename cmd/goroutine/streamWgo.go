@@ -5,11 +5,11 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"log"
-	"time"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -25,8 +25,13 @@ func GetPodLogs(cancelCtx context.Context, podName string) {
 		Follow:    true,
 		TailLines: &[]int64{int64(10)}[0],
 	})
-	LogStream, _ := PodLogsConnection.Stream(context.Background())
+	LogStream, err := PodLogsConnection.Stream(context.Background())
 
+	if err != nil {
+		logrus.Error(err)
+
+		return
+	}
 	defer LogStream.Close()
 
 	reader := bufio.NewScanner(LogStream)
@@ -45,18 +50,18 @@ func GetPodLogs(cancelCtx context.Context, podName string) {
 		}
 
 		if reader.Err() != nil {
-			log.Printf("error in logs inpput for pod: %v due to: %v\n", podName, reader.Err())
+			logrus.Printf("error in logs inpput for pod: %v due to: %v\n", podName, reader.Err())
 
 			break
 		}
 	}
 }
+
 func main() {
-	ctx := context.Background()
-	cancelCtx, endGofunc := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(context.Background())
 
 	Client = client.New("")
-	pods, err := Client.Pods(Namespace).List(context.Background(), v12.ListOptions{
+	pods, err := Client.Pods(Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: LabelSelector})
 
 	if err != nil {
@@ -68,9 +73,9 @@ func main() {
 	for _, pod := range pods.Items {
 		logrus.Println(pod.Name)
 
-		go GetPodLogs(cancelCtx, pod.Name)
+		go GetPodLogs(ctx, pod.Name)
 	}
 
 	time.Sleep(10 * time.Second)
-	endGofunc()
+	cancel()
 }

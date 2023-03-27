@@ -10,7 +10,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/sirupsen/logrus"
 )
@@ -170,7 +170,7 @@ func main() {
 	ctx := context.Background()
 	cancelCtx, endCheckers := context.WithCancel(ctx)
 
-	pods, err := client.Client.Pods(Namespace).List(context.Background(), v12.ListOptions{
+	pods, err := client.Client.Pods(Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: LabelSelector})
 
 	if err != nil {
