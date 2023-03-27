@@ -13,8 +13,10 @@
 <pre>
   func main() {
 	Client = client.New("")
+
 	ctx := context.Background()
 	cancelCtx, endCheckers := context.WithCancel(ctx)
+    //
 
 	pods, err := client.Client.Pods(Namespace).List(context.Background(), v12.ListOptions{
 		LabelSelector: LabelSelector})
@@ -43,17 +45,29 @@
 
 <td>
 <pre>
-Here we first get a list of pods. each pod runs a single container, generating the log line
 .
-Now we will use a context to allow use to stop the go routines that run in the background
+Here we first get the list of pods, that we will use for this example.
+Each pod runs a single container, generating the log line.
+.
+A context is used to stop the go routines we will use.
 .
 .
 Each go routine will check the log line and send the result to this channel
 .
+.
+.
+.
+.
+.
+
+.
+.
+.
+.
 Spin-up a go routine for each pod.
 .
 .
-Now run this collector function that will ignite in case a single of the go routines fail a verify.
+Now run this collector function that will check all go routines checked the log as expected.
 .
 </pre>
 </td>
