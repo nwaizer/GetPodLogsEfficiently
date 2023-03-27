@@ -9,7 +9,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -51,7 +51,7 @@ func GetPodLogs(podName string) error {
 
 func main() {
 	Client = client.New("")
-	pods, err := Client.Pods(Namespace).List(context.Background(), v12.ListOptions{
+	pods, err := Client.Pods(Namespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: LabelSelector})
 
 	if err != nil {
